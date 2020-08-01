@@ -257,6 +257,7 @@ function streamToPromise(stream) {
 }
 exports.streamToPromise = streamToPromise;
 function getElectronVersion() {
+    return process.versions.node;
     const yarnrc = fs.readFileSync(path.join(root, '.yarnrc'), 'utf8');
     const target = /^target "(.*)"$/m.exec(yarnrc)[1];
     return target;

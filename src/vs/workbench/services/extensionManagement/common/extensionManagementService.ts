@@ -237,6 +237,11 @@ export class ExtensionManagementService extends Disposable implements IExtension
 			return this.extensionManagementServerService.webExtensionManagementServer.extensionManagementService.installFromGallery(gallery);
 		}
 
+		// NOTE@coder: Fall back to installing on the remote server.
+		if (this.extensionManagementServerService.remoteExtensionManagementServer) {
+			return this.extensionManagementServerService.remoteExtensionManagementServer.extensionManagementService.installFromGallery(gallery);
+		}
+
 		if (this.extensionManagementServerService.remoteExtensionManagementServer) {
 			const error = new Error(localize('cannot be installed', "Cannot install '{0}' because this extension has defined that it cannot run on the remote server.", gallery.displayName || gallery.name));
 			error.name = INSTALL_ERROR_NOT_SUPPORTED;

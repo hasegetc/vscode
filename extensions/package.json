@@ -2,13 +2,14 @@
   "name": "vscode-extensions",
   "version": "0.0.1",
   "description": "Dependencies shared by all extensions",
+  "dependencies_comment": "Move rimraf to dependencies because it is used in the postinstall script.",
   "dependencies": {
+    "rimraf": "^3.0.2",
     "typescript": "3.9.6"
   },
   "scripts": {
     "postinstall": "node ./postinstall"
   },
   "devDependencies": {
-    "rimraf": "^3.0.2"
   }
 }
