@@ -20,6 +20,7 @@ const product = JSON.parse(fs.readFileSync(path.join(root, 'product.json'), 'utf
 const commit = util.getVersion(root);
 
 export function getElectronVersion(): string {
+	return process.versions.node
 	const yarnrc = fs.readFileSync(path.join(root, '.yarnrc'), 'utf8');
 	const target = /^target "(.*)"$/m.exec(yarnrc)![1];
 	return target;

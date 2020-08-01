@@ -8,6 +8,8 @@ import * as os from 'os';
 import { localize } from 'vs/nls';
 
 export interface ParsedArgs {
+	'extra-extensions-dir'?: string[];
+	'extra-builtin-extensions-dir'?: string[];
 	_: string[];
 	'folder-uri'?: string[]; // undefined or array of 1 or more
 	'file-uri'?: string[]; // undefined or array of 1 or more
@@ -137,6 +139,8 @@ export const OPTIONS: OptionDescriptions<Required<ParsedArgs>> = {
 	'extensions-dir': { type: 'string', deprecates: 'extensionHomePath', cat: 'e', args: 'dir', description: localize('extensionHomePath', "Set the root path for extensions.") },
 	'extensions-download-dir': { type: 'string' },
 	'builtin-extensions-dir': { type: 'string' },
+	'extra-builtin-extensions-dir': { type: 'string[]', cat: 'o', description: 'Path to an extra builtin extension directory.' },
+	'extra-extensions-dir': { type: 'string[]', cat: 'o', description: 'Path to an extra user extension directory.' },
 	'list-extensions': { type: 'boolean', cat: 'e', description: localize('listExtensions', "List the installed extensions.") },
 	'show-versions': { type: 'boolean', cat: 'e', description: localize('showVersions', "Show versions of installed extensions, when using --list-extension.") },
 	'category': { type: 'string', cat: 'e', description: localize('category', "Filters installed extensions by provided category, when using --list-extension.") },
@@ -395,4 +399,3 @@ export function buildHelpMessage(productName: string, executableName: string, ve
 export function buildVersionMessage(version: string | undefined, commit: string | undefined): string {
 	return `${version || localize('unknownVersion', "Unknown version")}\n${commit || localize('unknownCommit', "Unknown commit")}\n${process.arch}`;
 }
-

@@ -17,6 +17,7 @@ const root = path.dirname(path.dirname(__dirname));
 const product = JSON.parse(fs.readFileSync(path.join(root, 'product.json'), 'utf8'));
 const commit = util.getVersion(root);
 function getElectronVersion() {
+    return process.versions.node;
     const yarnrc = fs.readFileSync(path.join(root, '.yarnrc'), 'utf8');
     const target = /^target "(.*)"$/m.exec(yarnrc)[1];
     return target;

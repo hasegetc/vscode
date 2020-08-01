@@ -14,6 +14,7 @@ import { IWorkbenchConstructionOptions } from 'vs/workbench/workbench.web.api';
 import product from 'vs/platform/product/common/product';
 import { memoize } from 'vs/base/common/decorators';
 import { onUnexpectedError } from 'vs/base/common/errors';
+import * as paths from 'vs/base/common/path';
 
 export class BrowserEnvironmentConfiguration implements IEnvironmentConfiguration {
 
@@ -204,6 +205,20 @@ export class BrowserWorkbenchEnvironmentService implements IWorkbenchEnvironment
 	get webviewCspSource(): string {
 		return this.webviewExternalEndpoint.replace('{{uuid}}', '*');
 	}
+
+	// NOTE@coder: vscodevim uses the global storage home.
+	@memoize
+	get userDataPath(): string {
+		const dataPath = this.payload?.get("userDataPath");
+		if (!dataPath) {
+			throw new Error("userDataPath was not provided to environment service");
+		}
+		return dataPath;
+	}
+	@memoize
+	get appSettingsHome(): URI { return URI.file(paths.join(this.userDataPath, 'User')); }
+	@memoize
+	get globalStorageHome(): string { return paths.join(this.appSettingsHome.fsPath, 'globalStorage'); }
 
 	get disableTelemetry(): boolean { return false; }
 

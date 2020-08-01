@@ -33,9 +33,9 @@ function yarnInstall(location, opts) {
 
 yarnInstall('extensions'); // node modules shared by all extensions
 
-yarnInstall('remote'); // node modules used by vscode server
+// yarnInstall('remote'); // node modules used by vscode server
 
-yarnInstall('remote/web'); // node modules used by vscode web
+// yarnInstall('remote/web'); // node modules used by vscode web
 
 const allExtensionFolders = fs.readdirSync('extensions');
 const extensions = allExtensionFolders.filter(e => {
@@ -68,7 +68,7 @@ runtime "${runtime}"`;
 }
 
 yarnInstall(`build`); // node modules required for build
-yarnInstall('test/automation'); // node modules required for smoketest
-yarnInstall('test/smoke'); // node modules required for smoketest
-yarnInstall('test/integration/browser'); // node modules required for integration
+// yarnInstall('test/automation'); // node modules required for smoketest
+// yarnInstall('test/smoke'); // node modules required for smoketest
+// yarnInstall('test/integration/browser'); // node modules required for integration
 yarnInstallBuildDependencies(); // node modules for watching, specific to host node version, not electron

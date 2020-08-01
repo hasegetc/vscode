@@ -746,11 +746,15 @@ export class ExtensionManagementService extends Disposable implements IExtension
 
 	private scanSystemExtensions(): Promise<ILocalExtension[]> {
 		this.logService.trace('Started scanning system extensions');
-		const systemExtensionsPromise = this.scanExtensions(this.systemExtensionsPath, ExtensionType.System)
-			.then(result => {
-				this.logService.trace('Scanned system extensions:', result.length);
-				return result;
-			});
+		const systemExtensionsPromise = Promise.all([
+			this.scanExtensions(this.systemExtensionsPath, ExtensionType.System),
+			...this.environmentService.extraBuiltinExtensionPaths
+				.map((path) => this.scanExtensions(path, ExtensionType.System))
+		]).then((results) => {
+			const result = results.reduce((flat, current) => flat.concat(current), []);
+			this.logService.trace('Scanned system extensions:', result.length);
+			return result;
+		});
 		if (this.environmentService.isBuilt) {
 			return systemExtensionsPromise;
 		}
@@ -772,9 +776,16 @@ export class ExtensionManagementService extends Disposable implements IExtension
 			.then(([systemExtensions, devSystemExtensions]) => [...systemExtensions, ...devSystemExtensions]);
 	}
 
+	private scanAllUserExtensions(folderName: string, type: ExtensionType): Promise<ILocalExtension[]> {
+		return Promise.all([
+			this.scanExtensions(folderName, type),
+			...this.environmentService.extraExtensionPaths.map((p) => this.scanExtensions(p, ExtensionType.User))
+		]).then((results) => results.reduce((flat, current) => flat.concat(current), []));
+	}
+
 	private scanUserExtensions(excludeOutdated: boolean): Promise<ILocalExtension[]> {
 		this.logService.trace('Started scanning user extensions');
-		return Promise.all([this.getUninstalledExtensions(), this.scanExtensions(this.extensionsPath, ExtensionType.User)])
+		return Promise.all([this.getUninstalledExtensions(), this.scanAllUserExtensions(this.extensionsPath, ExtensionType.User)])
 			.then(([uninstalled, extensions]) => {
 				extensions = extensions.filter(e => !uninstalled[new ExtensionIdentifierWithVersion(e.identifier, e.manifest.version).key()]);
 				if (excludeOutdated) {
@@ -789,6 +800,12 @@ export class ExtensionManagementService extends Disposable implements IExtension
 	private scanExtensions(root: string, type: ExtensionType): Promise<ILocalExtension[]> {
 		const limiter = new Limiter<any>(10);
 		return pfs.readdir(root)
+			.catch((error) => {
+				if (error.code !== 'ENOENT') {
+					throw error;
+				}
+				return <string[]>[];
+			})
 			.then(extensionsFolders => Promise.all<ILocalExtension>(extensionsFolders.map(extensionFolder => limiter.queue(() => this.scanExtension(extensionFolder, root, type)))))
 			.then(extensions => extensions.filter(e => e && e.identifier));
 	}
@@ -827,7 +844,7 @@ export class ExtensionManagementService extends Disposable implements IExtension
 
 	private async removeUninstalledExtensions(): Promise<void> {
 		const uninstalled = await this.getUninstalledExtensions();
-		const extensions = await this.scanExtensions(this.extensionsPath, ExtensionType.User); // All user extensions
+		const extensions = await this.scanAllUserExtensions(this.extensionsPath, ExtensionType.User); // All user extensions
 		const installed: Set<string> = new Set<string>();
 		for (const e of extensions) {
 			if (!uninstalled[new ExtensionIdentifierWithVersion(e.identifier, e.manifest.version).key()]) {
@@ -846,7 +863,7 @@ export class ExtensionManagementService extends Disposable implements IExtension
 	}
 
 	private removeOutdatedExtensions(): Promise<void> {
-		return this.scanExtensions(this.extensionsPath, ExtensionType.User) // All user extensions
+		return this.scanAllUserExtensions(this.extensionsPath, ExtensionType.User) // All user extensions
 			.then(extensions => {
 				const toRemove: ILocalExtension[] = [];
 

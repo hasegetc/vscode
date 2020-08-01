@@ -24,11 +24,13 @@ import { IExtensionStoragePaths } from 'vs/workbench/api/common/extHostStoragePa
 import { IExtHostExtensionService } from 'vs/workbench/api/common/extHostExtensionService';
 import { ExtHostExtensionService } from 'vs/workbench/api/node/extHostExtensionService';
 import { IExtHostStorage, ExtHostStorage } from 'vs/workbench/api/common/extHostStorage';
+import { IExtHostNodeProxy } from 'vs/server/browser/extHostNodeProxy';
 import { ILogService } from 'vs/platform/log/common/log';
 import { ExtHostLogService } from 'vs/workbench/api/node/extHostLogService';
 import { IExtHostTunnelService } from 'vs/workbench/api/common/extHostTunnelService';
 import { ExtHostTunnelService } from 'vs/workbench/api/node/extHostTunnelService';
 import { IExtHostApiDeprecationService, ExtHostApiDeprecationService } from 'vs/workbench/api/common/extHostApiDeprecationService';
+import { NotImplementedProxy } from 'vs/base/common/types';
 
 // register singleton services
 registerSingleton(ILogService, ExtHostLogService);
@@ -47,3 +49,4 @@ registerSingleton(IExtensionStoragePaths, ExtensionStoragePaths);
 registerSingleton(IExtHostExtensionService, ExtHostExtensionService);
 registerSingleton(IExtHostStorage, ExtHostStorage);
 registerSingleton(IExtHostTunnelService, ExtHostTunnelService);
+registerSingleton(IExtHostNodeProxy, class extends NotImplementedProxy<IExtHostNodeProxy>(String(IExtHostNodeProxy)) { whenReady = Promise.resolve(); });

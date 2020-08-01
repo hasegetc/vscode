@@ -5,7 +5,7 @@
 
 import * as nls from 'vs/nls';
 import * as path from 'vs/base/common/path';
-import { originalFSPath, joinPath } from 'vs/base/common/resources';
+import { originalFSPath } from 'vs/base/common/resources';
 import { Barrier } from 'vs/base/common/async';
 import { dispose, toDisposable, DisposableStore } from 'vs/base/common/lifecycle';
 import { TernarySearchTree } from 'vs/base/common/map';
@@ -32,6 +32,7 @@ import { IExtHostInitDataService } from 'vs/workbench/api/common/extHostInitData
 import { IExtensionStoragePaths } from 'vs/workbench/api/common/extHostStoragePaths';
 import { IExtHostRpcService } from 'vs/workbench/api/common/extHostRpcService';
 import { ServiceCollection } from 'vs/platform/instantiation/common/serviceCollection';
+import { IExtHostNodeProxy } from 'vs/server/browser/extHostNodeProxy';
 import { IExtHostTunnelService } from 'vs/workbench/api/common/extHostTunnelService';
 import { IExtHostTerminalService } from 'vs/workbench/api/common/extHostTerminalService';
 
@@ -78,6 +79,7 @@ export abstract class AbstractExtHostExtensionService implements ExtHostExtensio
 	protected readonly _extHostWorkspace: ExtHostWorkspace;
 	protected readonly _extHostConfiguration: ExtHostConfiguration;
 	protected readonly _logService: ILogService;
+	protected readonly _nodeProxy: IExtHostNodeProxy;
 	protected readonly _extHostTunnelService: IExtHostTunnelService;
 	protected readonly _extHostTerminalService: IExtHostTerminalService;
 
@@ -109,6 +111,7 @@ export abstract class AbstractExtHostExtensionService implements ExtHostExtensio
 		@ILogService logService: ILogService,
 		@IExtHostInitDataService initData: IExtHostInitDataService,
 		@IExtensionStoragePaths storagePath: IExtensionStoragePaths,
+		@IExtHostNodeProxy nodeProxy: IExtHostNodeProxy,
 		@IExtHostTunnelService extHostTunnelService: IExtHostTunnelService,
 		@IExtHostTerminalService extHostTerminalService: IExtHostTerminalService
 	) {
@@ -119,6 +122,7 @@ export abstract class AbstractExtHostExtensionService implements ExtHostExtensio
 		this._extHostWorkspace = extHostWorkspace;
 		this._extHostConfiguration = extHostConfiguration;
 		this._logService = logService;
+		this._nodeProxy = nodeProxy;
 		this._extHostTunnelService = extHostTunnelService;
 		this._extHostTerminalService = extHostTerminalService;
 		this._disposables = new DisposableStore();
@@ -345,14 +349,14 @@ export abstract class AbstractExtHostExtensionService implements ExtHostExtensio
 
 		const activationTimesBuilder = new ExtensionActivationTimesBuilder(reason.startup);
 		return Promise.all([
-			this._loadCommonJSModule<IExtensionModule>(joinPath(extensionDescription.extensionLocation, extensionDescription.main), activationTimesBuilder),
+			this._loadCommonJSModule<IExtensionModule>(extensionDescription, activationTimesBuilder),
 			this._loadExtensionContext(extensionDescription)
 		]).then(values => {
 			return AbstractExtHostExtensionService._callActivate(this._logService, extensionDescription.identifier, values[0], values[1], activationTimesBuilder);
 		});
 	}
 
-	protected abstract _loadCommonJSModule<T>(module: URI, activationTimesBuilder: ExtensionActivationTimesBuilder): Promise<T>;
+	protected abstract _loadCommonJSModule<T>(module: URI | IExtensionDescription, activationTimesBuilder: ExtensionActivationTimesBuilder): Promise<T>;
 
 	private _loadExtensionContext(extensionDescription: IExtensionDescription): Promise<vscode.ExtensionContext> {
 

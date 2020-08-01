@@ -120,9 +120,11 @@
 	margin-right: 8px;
 }
 
-.scm-viewlet .monaco-list .monaco-list-row .resource > .name > .monaco-icon-label > .actions {
-	flex-grow: 100;
-}
+/* NOTE@coder: Causes the label to shrink to zero width in Firefox due to
+ * overflow:hidden. This isn't right anyway, as far as I can tell. */
+/* .scm-viewlet .monaco-list .monaco-list-row .resource > .name > .monaco-icon-label > .actions { */
+/* 	flex-grow: 100; */
+/* } */
 
 .scm-viewlet .monaco-list .monaco-list-row .resource-group > .actions,
 .scm-viewlet .monaco-list .monaco-list-row .resource > .name > .monaco-icon-label > .actions {

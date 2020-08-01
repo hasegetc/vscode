@@ -20,9 +20,10 @@ import { IExtHostStorage, ExtHostStorage } from 'vs/workbench/api/common/extHost
 import { ExtHostExtensionService } from 'vs/workbench/api/worker/extHostExtensionService';
 import { ILogService } from 'vs/platform/log/common/log';
 import { ExtHostLogService } from 'vs/workbench/api/worker/extHostLogService';
+import { ExtHostNodeProxy, IExtHostNodeProxy } from 'vs/server/browser/extHostNodeProxy';
+import { ExtensionStoragePaths } from 'vs/workbench/api/node/extHostStoragePaths';
 import { IExtHostTunnelService, ExtHostTunnelService } from 'vs/workbench/api/common/extHostTunnelService';
 import { IExtHostApiDeprecationService, ExtHostApiDeprecationService, } from 'vs/workbench/api/common/extHostApiDeprecationService';
-import { NotImplementedProxy } from 'vs/base/common/types';
 
 // register singleton services
 registerSingleton(ILogService, ExtHostLogService);
@@ -36,9 +37,10 @@ registerSingleton(IExtHostDocumentsAndEditors, ExtHostDocumentsAndEditors);
 registerSingleton(IExtHostStorage, ExtHostStorage);
 registerSingleton(IExtHostExtensionService, ExtHostExtensionService);
 registerSingleton(IExtHostSearch, ExtHostSearch);
+registerSingleton(IExtHostNodeProxy, ExtHostNodeProxy);
 registerSingleton(IExtHostTunnelService, ExtHostTunnelService);
 
 registerSingleton(IExtHostTerminalService, WorkerExtHostTerminalService);
 registerSingleton(IExtHostTask, WorkerExtHostTask);
 registerSingleton(IExtHostDebugService, WorkerExtHostDebugService);
-registerSingleton(IExtensionStoragePaths, class extends NotImplementedProxy<IExtensionStoragePaths>(String(IExtensionStoragePaths)) { whenReady = Promise.resolve(); });
+registerSingleton(IExtensionStoragePaths, ExtensionStoragePaths);
