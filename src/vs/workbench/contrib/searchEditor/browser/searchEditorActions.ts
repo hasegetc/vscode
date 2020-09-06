@@ -148,7 +148,8 @@ export const openNewSearchEditor =
 		if (existing && args.location === 'reuse') {
 			const input = existing.editor as SearchEditorInput;
 			editor = assertIsDefined(await assertIsDefined(editorGroupsService.getGroup(existing.groupId)).openEditor(input)) as SearchEditor;
-			editor.focusSearchInput();
+			if (selected) { editor.setQuery(selected); }
+			else { editor.selectQuery(); }
 		} else {
 			const input = instantiationService.invokeFunction(getOrMakeSearchEditorInput, { config: args, text: '' });
 			editor = await editorService.openEditor(input, { pinned: true }, toSide ? SIDE_GROUP : ACTIVE_GROUP) as SearchEditor;
@@ -161,6 +162,8 @@ export const openNewSearchEditor =
 		) {
 			editor.triggerSearch({ focusResults: args.focusResults !== false });
 		}
+
+		if (args.focusResults === false) { editor.focusSearchInput(); }
 	};
 
 export const createEditorFromSearchResult =
@@ -175,13 +178,14 @@ export const createEditorFromSearchResult =
 		const instantiationService = accessor.get(IInstantiationService);
 		const labelService = accessor.get(ILabelService);
 		const configurationService = accessor.get(IConfigurationService);
+		const sortOrder = configurationService.getValue<ISearchConfigurationProperties>('search').sortOrder;
 
 
 		telemetryService.publicLog2('searchEditor/createEditorFromSearchResult');
 
 		const labelFormatter = (uri: URI): string => labelService.getUriLabel(uri, { relative: true });
 
-		const { text, matchRanges, config } = serializeSearchResultForEditor(searchResult, rawIncludePattern, rawExcludePattern, 0, labelFormatter);
+		const { text, matchRanges, config } = serializeSearchResultForEditor(searchResult, rawIncludePattern, rawExcludePattern, 0, labelFormatter, sortOrder);
 		const contextLines = configurationService.getValue<ISearchConfigurationProperties>('search').searchEditor.defaultNumberOfContextLines;
 
 		if (searchResult.isDirty || contextLines === 0 || contextLines === null) {
